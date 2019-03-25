@@ -1,4 +1,6 @@
 # asonic - async python client for the sonic search backend
+Asonic implements all Sonic APIs
+This is a very early stage of the package, bugfixes and api changes are welcome
 
 ## Install
 `pip install asonic`
