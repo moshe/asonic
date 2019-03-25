@@ -1,8 +1,14 @@
-from typing import Union, List
+from typing import List
 
 from asonic.connection import ConnectionPool
 from asonic.enums import Commands, Channels, all_commands, enabled_commands, Actions
 from asonic.exceptions import ClientError
+
+
+def escape(t):
+    if t is None:
+        return ""
+    return '"' + t.replace('"', '\\"') + '"'
 
 
 class Client:
@@ -32,8 +38,6 @@ class Client:
 
     async def query(self, collection: str, bucket: str, terms: str, limit: int = None, offset: int = None) -> List[str]:
         """
-        TODO: Check multiple returns, offset and limit
-        TODO: Terms shold be list
         query database
         time complexity: O(1) if enough exact word matches or O(N) if not enough exact matches where
         N is the number of alternate words tried, in practice it approaches O(1)
@@ -44,7 +48,7 @@ class Client:
         :param offset:  a positive integer number; set within allowed maximum & minimum limits
         """
 
-        response = await self._command(Commands.QUERY, collection, bucket, f'"{terms}"', limit=limit, offset=offset)
+        response = await self._command(Commands.QUERY, collection, bucket, escape(terms), limit=limit, offset=offset)
         tokens = response.split()
         if len(tokens) == 3:
             return []
@@ -53,7 +57,6 @@ class Client:
 
     async def suggest(self, collection: str, bucket: str, word: str, limit: int = None) -> List[str]:
         """
-        TODO: Escape word
         auto-completes word
         time complexity: O(1)
         :param collection: index collection (ie. what you search in, eg. messages, products, etc.);
@@ -61,7 +64,7 @@ class Client:
         :param word: text for search term
         :param limit: a positive integer number; set within allowed maximum & minimum limits
         """
-        response = await self._command(Commands.SUGGEST, collection, bucket, f'"{word}"', limit=limit)
+        response = await self._command(Commands.SUGGEST, collection, bucket, escape(word), limit=limit)
         tokens = response.split()
         if len(tokens) == 3:
             return []
@@ -102,7 +105,7 @@ class Client:
         :param text: search text to be indexed (can be a single word, or a longer text; within maximum length safety
         limits);
         """
-        return await self._command(Commands.PUSH, collection, bucket, obj, f'"{text}"')
+        return await self._command(Commands.PUSH, collection, bucket, obj, escape(text))
 
     async def pop(self, collection: str, bucket: str, obj: str, text: str) -> int:
         """
@@ -116,7 +119,7 @@ class Client:
         :param text: search text to be indexed (can be a single word, or a longer text; within maximum length safety
         limits);
         """
-        result = await self._command(Commands.POP, collection, bucket, obj, f'"{text}"')
+        result = await self._command(Commands.POP, collection, bucket, obj, escape(text))
         return int(result[7:])
 
     async def flushc(self, collection: str) -> str:
