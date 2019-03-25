@@ -1,7 +1,9 @@
 version: '2.1'
 services:
-  loader:
+  pytest:
     command: py.test /app
+    environment:
+      - SONIC_HOST=sonic
     build:
       context: .
     links:

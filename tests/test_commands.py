@@ -3,25 +3,23 @@ import pytest
 a = pytest.mark.asyncio
 collection = 'collection'
 
+pytestmark = pytest.mark.asyncio
 
-@a
+
 async def test_ping(search, ingest):
     assert await search.ping() == b'PONG'
     assert await ingest.ping() == b'PONG'
 
 
-@a
 async def test_help(search):
     assert await search.help('commands') == b'RESULT commands(QUERY, SUGGEST, PING, HELP, QUIT)'
 
 
-@a
 async def test_empty(search):
     assert await search.query(collection, 'user1', 'test') == []
     assert await search.suggest(collection, 'user1', 'test') == []
 
 
-@a
 async def test_push(search, ingest):
     bucket = 'bucket:1'
     uid = 'uid'
@@ -29,14 +27,14 @@ async def test_push(search, ingest):
     assert (await search.suggest(collection, bucket, 't', 1)) == []
     assert (await ingest.count(collection, bucket, uid)) == 6
 
-@a
+
 async def test_query(search, ingest):
     bucket = 'bucket:1'
     uid = 'uid'
     assert (await ingest.push(collection, bucket, uid, 'The quick brown fox jumps over the lazy dog')) == b'OK'
     assert (await search.query(collection, bucket, 'quick', 1, 0)) == [uid.encode()]
 
-@a
+
 async def test_pop(search, ingest):
     bucket = 'bucket:1'
     uid = 'uid'
@@ -45,7 +43,7 @@ async def test_pop(search, ingest):
     assert (await ingest.count(collection, bucket, uid)) == 5
     assert (await search.query(collection, bucket, 'quick')) == []
 
-@a
+
 async def test_limit_offset(search, ingest):
     bucket = 'bucket:1'
     uid = 'uid'
