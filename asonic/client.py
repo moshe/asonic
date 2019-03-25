@@ -8,7 +8,7 @@ from asonic.exceptions import ClientError
 def escape(t):
     if t is None:
         return ""
-    return '"' + t.replace('"', '\\"') + '"'
+    return '"' + t.replace('"', '\\"').replace('\r\n', ' ') + '"'
 
 
 class Client:
