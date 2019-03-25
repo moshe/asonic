@@ -22,4 +22,7 @@ setup(
     long_description=long_description,
     description='Async python client for Sonic database',
     install_requires=[],
+    extras_require={
+        'tests': ['pytest', 'pytest-asyncio'],
+    },
 )

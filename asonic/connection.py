@@ -26,7 +26,6 @@ class Connection:
 
     async def read(self):
         line = (await self.reader.readline()).strip()
-        print('Got', line)
         if line.startswith(b'ERR '):
             raise ServerError(line[4:])
         return line

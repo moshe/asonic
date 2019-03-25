@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, List
 
 from asonic.connection import ConnectionPool
 from asonic.enums import Commands, Channels, all_commands, enabled_commands, Actions
@@ -30,8 +30,7 @@ class Client:
         self.pool = ConnectionPool(host=self.host, port=self.port, channel=channel,
                                    max_connections=self.max_connections)
 
-    async def query(self, collection: str, bucket: str, terms: str, limit: int = None, offset: int = None) \
-            -> Union[None, str]:
+    async def query(self, collection: str, bucket: str, terms: str, limit: int = None, offset: int = None) -> List[str]:
         """
         TODO: Check multiple returns, offset and limit
         TODO: Terms shold be list
@@ -48,11 +47,11 @@ class Client:
         response = await self._command(Commands.QUERY, collection, bucket, f'"{terms}"', limit=limit, offset=offset)
         tokens = response.split()
         if len(tokens) == 3:
-            return None
+            return []
         else:
-            return tokens[3]
+            return tokens[3:]
 
-    async def suggest(self, collection: str, bucket: str, word: str, limit: int = None) -> Union[None, str]:
+    async def suggest(self, collection: str, bucket: str, word: str, limit: int = None) -> List[str]:
         """
         TODO: Escape word
         auto-completes word
@@ -64,11 +63,10 @@ class Client:
         """
         response = await self._command(Commands.SUGGEST, collection, bucket, f'"{word}"', limit=limit)
         tokens = response.split()
-        print(tokens)
         if len(tokens) == 3:
-            return None
+            return []
         else:
-            return tokens[3]
+            return tokens[3:]
 
     async def ping(self) -> str:
         """
@@ -192,7 +190,6 @@ class Client:
                     values.append(f'OFFSET({kwargs[k]})')
                 else:
                     values.append(kwargs[k])
-        print(f'{command} {" ".join(args)} {" ".join(values)}'.strip())
         await c.write(f'{command} {" ".join(args)} {" ".join(values)}'.strip())
 
         result = await c.read()

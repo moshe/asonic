@@ -1,31 +1,7 @@
 import pytest
 
-from asonic import Client
-from asonic.enums import Channels
-
 a = pytest.mark.asyncio
 collection = 'collection'
-
-
-@pytest.fixture(autouse=True)
-async def clean():
-    c = Client(host='127.0.0.1', port=1491)
-    await c.channel(Channels.INGEST.value)
-    await c.flushc(collection)
-
-
-@pytest.fixture
-async def search():
-    c = Client(host='127.0.0.1', port=1491)
-    await c.channel(Channels.SEARCH.value)
-    return c
-
-
-@pytest.fixture
-async def ingest():
-    c = Client(host='127.0.0.1', port=1491)
-    await c.channel(Channels.INGEST.value)
-    return c
 
 
 @a
@@ -41,18 +17,42 @@ async def test_help(search):
 
 @a
 async def test_empty(search):
-    assert await search.query(collection, 'user1', 'test') is None
-    assert await search.suggest(collection, 'user1', 'test') is None
+    assert await search.query(collection, 'user1', 'test') == []
+    assert await search.suggest(collection, 'user1', 'test') == []
 
 
 @a
 async def test_push(search, ingest):
     bucket = 'bucket:1'
     uid = 'uid'
-    assert (await ingest.push(collection, bucket, uid, 'The quick brown fox jumps over the lazy dog complete')) == b'OK'
-    assert (await search.suggest(collection, bucket, 't', 1)) is None
-    assert (await ingest.count(collection, bucket, uid)) == 7
-    assert (await search.query(collection, bucket, 'quick', 1, 0)) == uid.encode()
-    assert (await ingest.pop(collection, bucket, uid, 'quick')) == 1
+    assert (await ingest.push(collection, bucket, uid, 'The quick brown fox jumps over the lazy dog')) == b'OK'
+    assert (await search.suggest(collection, bucket, 't', 1)) == []
     assert (await ingest.count(collection, bucket, uid)) == 6
-    assert (await search.query(collection, bucket, 'quick')) is None
+
+@a
+async def test_query(search, ingest):
+    bucket = 'bucket:1'
+    uid = 'uid'
+    assert (await ingest.push(collection, bucket, uid, 'The quick brown fox jumps over the lazy dog')) == b'OK'
+    assert (await search.query(collection, bucket, 'quick', 1, 0)) == [uid.encode()]
+
+@a
+async def test_pop(search, ingest):
+    bucket = 'bucket:1'
+    uid = 'uid'
+    assert (await ingest.push(collection, bucket, uid, 'The quick brown fox jumps over the lazy dog')) == b'OK'
+    assert (await ingest.pop(collection, bucket, uid, 'quick')) == 1
+    assert (await ingest.count(collection, bucket, uid)) == 5
+    assert (await search.query(collection, bucket, 'quick')) == []
+
+@a
+async def test_limit_offset(search, ingest):
+    bucket = 'bucket:1'
+    uid = 'uid'
+    uid2 = 'uid2'
+    assert (await ingest.push(collection, bucket, uid, 'The quick brown fox jumps over the lazy dog')) == b'OK'
+    assert (await ingest.push(collection, bucket, uid2,
+                              'The quick brown fox jumps over the lazy dog complete')) == b'OK'
+    assert (await search.query(collection, bucket, 'fox')) == [uid2.encode(), uid.encode()]
+    assert (await search.query(collection, bucket, 'fox', limit=1)) == [uid2.encode()]
+    assert (await search.query(collection, bucket, 'fox', limit=1, offset=1)) == [uid.encode()]
