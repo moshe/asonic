@@ -1,5 +1,3 @@
-import asyncio
-
 from typing import Union
 
 from asonic.connection import ConnectionPool
@@ -202,34 +200,3 @@ class Client:
             result = await c.read()
         await self.pool.release(c)
         return result
-
-
-async def main():
-    ci = Client(host='127.0.0.1', port=1491)
-    await ci.channel(Channels.INGEST.value)
-    print(await ci.ping())
-    # jobs = []
-    # for job in range(200_000):
-    #     if job % 1000 == 0:
-    #         print(job)
-    #     jobs.append(ci.push('messages', f'user:0dcde3a{job % 1000}', f'conversation:{job}', 'moshe zada haya po'))
-    #     # await ci.push('messages', f'user:0dcde3a{job % 1000}', f'conversation:{job}', 'moshe zada haya po')
-    # await asyncio.gather(*jobs)
-    # c = Client(host='127.0.0.1', port=1491)
-    # await c.channel('search')
-    # await c.ping()
-    # await c.quit()
-    # await c.channel('search')
-    # await c.help('commands')
-    # await c.query('messages', 'user:0dcde3a6', 'zada')
-    # await c.suggest('messages', 'user:0dcde3a6', 'mosh')
-    #
-    # await ci.pop('messages', 'user:0dcde3a6', 'conversation:71f3d63b', 'zada')
-    # await c.query('messages', 'user:0dcde3a6', 'zada')
-    #
-    # assert (await ci.count('messages')) == 1
-
-
-if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
