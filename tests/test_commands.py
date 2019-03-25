@@ -1,6 +1,5 @@
 import pytest
 
-a = pytest.mark.asyncio
 collection = 'collection'
 
 pytestmark = pytest.mark.asyncio
