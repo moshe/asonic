@@ -12,7 +12,8 @@ def escape(t):
 
 
 class Client:
-    def __init__(self, host: str, port: int, password: str = 'SecretPassword', max_connections: int = 100):
+    def __init__(self, host: str = 'localhost', port: int = 1491, password: str = 'SecretPassword',
+                 max_connections: int = 100):
         self.host = host
         self.port = port
         self.password = password
@@ -27,7 +28,7 @@ class Client:
         Channels(channel)
 
         async def mock(*_, **__):
-            raise RuntimeError(f'Command not available in {channel} channel')
+            raise ClientError(f'Command not available in {channel} channel')
 
         for command in all_commands:
             if command not in enabled_commands[channel]:
@@ -36,7 +37,8 @@ class Client:
         self.pool = ConnectionPool(host=self.host, port=self.port, channel=channel,
                                    max_connections=self.max_connections)
 
-    async def query(self, collection: str, bucket: str, terms: str, limit: int = None, offset: int = None) -> List[str]:
+    async def query(self, collection: str, bucket: str, terms: str, limit: int = None, offset: int = None) \
+            -> List[bytes]:
         """
         query database
         time complexity: O(1) if enough exact word matches or O(N) if not enough exact matches where
@@ -55,7 +57,7 @@ class Client:
         else:
             return tokens[3:]
 
-    async def suggest(self, collection: str, bucket: str, word: str, limit: int = None) -> List[str]:
+    async def suggest(self, collection: str, bucket: str, word: str, limit: int = None) -> List[bytes]:
         """
         auto-completes word
         time complexity: O(1)
@@ -71,21 +73,21 @@ class Client:
         else:
             return tokens[3:]
 
-    async def ping(self) -> str:
+    async def ping(self) -> bytes:
         """
         ping server
         time complexity: O(1)
         """
         return await self._command(Commands.PING)
 
-    async def quit(self) -> str:
+    async def quit(self) -> bytes:
         """
         stop connection
         time complexity: O(1)
         """
         return await self._command(Commands.QUIT)
 
-    async def help(self, manual: str) -> str:
+    async def help(self, manual: str) -> bytes:
         """
         show help
         time complexity: O(1)
@@ -93,7 +95,7 @@ class Client:
         """
         return await self._command(Commands.HELP, manual)
 
-    async def push(self, collection: str, bucket: str, obj: str, text: str) -> str:
+    async def push(self, collection: str, bucket: str, obj: str, text: str) -> bytes:
         """
         Push search data in the index
         time complexity: O(1)
@@ -122,15 +124,15 @@ class Client:
         result = await self._command(Commands.POP, collection, bucket, obj, escape(text))
         return int(result[7:])
 
-    async def flushc(self, collection: str) -> str:
+    async def flushc(self, collection: str) -> int:
         """
         Flush all indexed data from a collection
          time complexity: O(1)
         :param collection: index collection (ie. what you search in, eg. messages, products, etc.);
         """
-        return await self._command(Commands.FLUSHC, collection)
+        return int((await self._command(Commands.FLUSHC, collection))[7:])
 
-    async def flushb(self, collection: str, bucket: str) -> str:
+    async def flushb(self, collection: str, bucket: str) -> int:
         """
         Flush all indexed data from a bucket in a collection
          time complexity: O(1)
@@ -138,9 +140,9 @@ class Client:
         :param bucket: index bucket name (ie. user-specific search classifier in the collection if you have any
         """
 
-        return await self._command(Commands.FLUSHB, collection, bucket)
+        return int((await self._command(Commands.FLUSHB, collection, bucket))[7:])
 
-    async def flusho(self, collection: str, bucket: str, obj: str) -> str:
+    async def flusho(self, collection: str, bucket: str, obj: str) -> int:
         """
         Flush all indexed data from an object in a bucket in collection
          time complexity: O(1)
@@ -151,7 +153,7 @@ class Client:
         in this case the object identifier in Sonic will be the MySQL primary key for the CRM contact);
         """
 
-        return await self._command(Commands.FLUSHO, collection, bucket, obj)
+        return int((await self._command(Commands.FLUSHO, collection, bucket, obj))[7:])
 
     async def count(self, collection: str, bucket: str = None, obj: str = None) -> int:
         """
@@ -166,7 +168,7 @@ class Client:
         result = await self._command(Commands.COUNT, collection, bucket=bucket, object=obj)
         return int(result[7:])
 
-    async def trigger(self, action: str = None) -> str:
+    async def trigger(self, action: str = None) -> bytes:
         """
         Trigger an action
         time complexity: O(1)
@@ -175,12 +177,12 @@ class Client:
         Actions(action)
         return await self._command(Commands.TRIGGER, action=action)
 
-    async def _command(self, command, *args, **kwargs) -> str:
+    async def _command(self, command, *args, **kwargs) -> bytes:
         if isinstance(command, Commands):
             command = command.value
 
-        if self._channel is None:
-            raise RuntimeError('Call .channel before running any command')
+        if self._channel == Channels.UNINITIALIZED.value:
+            raise ClientError('Call .channel before running any command')
 
         c = await self.pool.get_connection()
 
@@ -199,4 +201,6 @@ class Client:
         if command in {Commands.QUERY.value, Commands.SUGGEST.value}:
             result = await c.read()
         await self.pool.release(c)
+        if command == Commands.QUIT.value:
+            await self.pool.destroy()
         return result

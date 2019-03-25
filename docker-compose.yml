@@ -1,7 +1,7 @@
 version: '2.1'
 services:
   pytest:
-    command: py.test /app
+    command: flake8 --max-line-length 120 /app && py.test /app
     environment:
       - SONIC_HOST=sonic
     build:
@@ -16,7 +16,7 @@ services:
     volumes:
       - ./tests/config.cfg:/etc/sonic.cfg
     healthcheck:
-      test: ["CMD", "sleep", "4"]
+      test: ["CMD", "sleep", "2"]
       interval: 1s
       timeout: 5s
       retries: 120

@@ -27,3 +27,10 @@ async def ingest():
     c = Client(host=getenv('SONIC_HOST', 'localhost'), port=1491)
     await c.channel(Channels.INGEST.value)
     return c
+
+
+@pytest.fixture
+async def control():
+    c = Client(host=getenv('SONIC_HOST', 'localhost'), port=1491)
+    await c.channel(Channels.CONTROL.value)
+    return c
