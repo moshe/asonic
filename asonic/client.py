@@ -43,7 +43,7 @@ class Client:
         query database
         time complexity: O(1) if enough exact word matches or O(N) if not enough exact matches where
         N is the number of alternate words tried, in practice it approaches O(1)
-        :param collection: index collection (ie. what you search in, eg. messages, products, etc.);
+        :param collection: index collection (ie. what you search in, eg. messages, products, etc.)
         :param bucket: index bucket name (ie. user-specific search classifier in the collection if you have any
         :param terms: text for search terms
         :param limit: a positive integer number; set within allowed maximum & minimum limits
@@ -61,7 +61,7 @@ class Client:
         """
         auto-completes word
         time complexity: O(1)
-        :param collection: index collection (ie. what you search in, eg. messages, products, etc.);
+        :param collection: index collection (ie. what you search in, eg. messages, products, etc.)
         :param bucket: index bucket name (ie. user-specific search classifier in the collection if you have any
         :param word: text for search term
         :param limit: a positive integer number; set within allowed maximum & minimum limits
@@ -99,13 +99,13 @@ class Client:
         """
         Push search data in the index
         time complexity: O(1)
-        :param collection: index collection (ie. what you search in, eg. messages, products, etc.);
+        :param collection: index collection (ie. what you search in, eg. messages, products, etc.)
         :param bucket: index bucket name (ie. user-specific search classifier in the collection if you have any
         :param obj: object identifier that refers to an entity in an external database, where the searched object
-        is stored (eg. you use Sonic to index CRM contacts by name; full CRM contact data is stored in a MySQL database;
-        in this case the object identifier in Sonic will be the MySQL primary key for the CRM contact);
+        is stored (eg. you use Sonic to index CRM contacts by name; full CRM contact data is stored in a MySQL database
+        in this case the object identifier in Sonic will be the MySQL primary key for the CRM contact)
         :param text: search text to be indexed (can be a single word, or a longer text; within maximum length safety
-        limits);
+        limits)
         """
         return await self._command(Commands.PUSH, collection, bucket, obj, escape(text))
 
@@ -113,13 +113,13 @@ class Client:
         """
         Pop search data from the index
         time complexity: O(1)
-        :param collection: index collection (ie. what you search in, eg. messages, products, etc.);
+        :param collection: index collection (ie. what you search in, eg. messages, products, etc.)
         :param bucket: index bucket name (ie. user-specific search classifier in the collection if you have any
         :param obj: object identifier that refers to an entity in an external database, where the searched object
-        is stored (eg. you use Sonic to index CRM contacts by name; full CRM contact data is stored in a MySQL database;
-        in this case the object identifier in Sonic will be the MySQL primary key for the CRM contact);
+        is stored (eg. you use Sonic to index CRM contacts by name; full CRM contact data is stored in a MySQL database
+        in this case the object identifier in Sonic will be the MySQL primary key for the CRM contact)
         :param text: search text to be indexed (can be a single word, or a longer text; within maximum length safety
-        limits);
+        limits)
         """
         result = await self._command(Commands.POP, collection, bucket, obj, escape(text))
         return int(result[7:])
@@ -127,16 +127,16 @@ class Client:
     async def flushc(self, collection: str) -> int:
         """
         Flush all indexed data from a collection
-         time complexity: O(1)
-        :param collection: index collection (ie. what you search in, eg. messages, products, etc.);
+        time complexity: O(1)
+        :param collection: index collection (ie. what you search in, eg. messages, products, etc.)
         """
         return int((await self._command(Commands.FLUSHC, collection))[7:])
 
     async def flushb(self, collection: str, bucket: str) -> int:
         """
         Flush all indexed data from a bucket in a collection
-         time complexity: O(1)
-        :param collection: index collection (ie. what you search in, eg. messages, products, etc.);
+        time complexity: O(1)
+        :param collection: index collection (ie. what you search in, eg. messages, products, etc.)
         :param bucket: index bucket name (ie. user-specific search classifier in the collection if you have any
         """
 
@@ -145,12 +145,12 @@ class Client:
     async def flusho(self, collection: str, bucket: str, obj: str) -> int:
         """
         Flush all indexed data from an object in a bucket in collection
-         time complexity: O(1)
-        :param collection: index collection (ie. what you search in, eg. messages, products, etc.);
+        time complexity: O(1)
+        :param collection: index collection (ie. what you search in, eg. messages, products, etc.)
         :param bucket: index bucket name (ie. user-specific search classifier in the collection if you have any
         :param obj: object identifier that refers to an entity in an external database, where the searched object
-        is stored (eg. you use Sonic to index CRM contacts by name; full CRM contact data is stored in a MySQL database;
-        in this case the object identifier in Sonic will be the MySQL primary key for the CRM contact);
+        is stored (eg. you use Sonic to index CRM contacts by name; full CRM contact data is stored in a MySQL database
+        in this case the object identifier in Sonic will be the MySQL primary key for the CRM contact)
         """
 
         return int((await self._command(Commands.FLUSHO, collection, bucket, obj))[7:])
@@ -159,11 +159,11 @@ class Client:
         """
         Count indexed search data
         time complexity: O(1)
-        :param collection: index collection (ie. what you search in, eg. messages, products, etc.);
+        :param collection: index collection (ie. what you search in, eg. messages, products, etc.)
         :param bucket: index bucket name (ie. user-specific search classifier in the collection if you have any
         :param obj: object identifier that refers to an entity in an external database, where the searched object
-        is stored (eg. you use Sonic to index CRM contacts by name; full CRM contact data is stored in a MySQL database;
-        in this case the object identifier in Sonic will be the MySQL primary key for the CRM contact);
+        is stored (eg. you use Sonic to index CRM contacts by name; full CRM contact data is stored in a MySQL database
+        in this case the object identifier in Sonic will be the MySQL primary key for the CRM contact)
         """
         result = await self._command(Commands.COUNT, collection, bucket=bucket, object=obj)
         return int(result[7:])
@@ -172,7 +172,7 @@ class Client:
         """
         Trigger an action
         time complexity: O(1)
-        :param action: action to be triggered (available actions: consolidate);
+        :param action: action to be triggered (available actions: consolidate)
         """
         Actions(action)
         return await self._command(Commands.TRIGGER, action=action)
