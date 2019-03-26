@@ -5,6 +5,9 @@ This is a very early stage of the package, bugfixes and api changes are welcome
 ## Install
 `pip install asonic`
 
+## API Docs
+[here](https://asonic.readthedocs.io/en/latest/asonic.html#module-asonic.client)
+
 ## Usage
 ### Search channel
 ```python
