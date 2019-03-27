@@ -26,6 +26,7 @@ class Connection:
     async def write(self, msg: str) -> None:
         self.logger.debug('>%s', msg)
         self.writer.write(((msg + '\r\n').encode()))
+        await self.writer.drain()
 
     async def read(self) -> bytes:
         line = (await self.reader.readline()).strip()
