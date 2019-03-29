@@ -56,7 +56,8 @@ class Client:
         :param terms: text for search terms
         :param limit: a positive integer number; set within allowed maximum & minimum limits
         :param offset: a positive integer number; set within allowed maximum & minimum limits
-        :param locale: an ISO 639-3 locale code (if set, the code must be recognized)
+        :param locale: an ISO 639-3 locale code eg. `eng` for English
+        (if set, the locale must be a valid ISO 639-3 code; if not set, the locale will be guessed from text)
         """
 
         response = await self._command(Commands.QUERY, collection, bucket, escape(terms), limit=limit, offset=offset)
@@ -114,8 +115,9 @@ class Client:
         is stored (eg. you use Sonic to index CRM contacts by name; full CRM contact data is stored in a MySQL database
         in this case the object identifier in Sonic will be the MySQL primary key for the CRM contact)
         :param text: search text to be indexed (can be a single word, or a longer text; within maximum length safety
-        :param locale: an ISO 639-3 locale code (if set, the code must be recognized)
         limits)
+        :param locale: an ISO 639-3 locale code eg. `eng` for English
+        (if set, the locale must be a valid ISO 639-3 code; if not set, the locale will be guessed from text)
         """
         return await self._command(Commands.PUSH, collection, bucket, obj, escape(text))
 
