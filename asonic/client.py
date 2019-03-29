@@ -1,7 +1,8 @@
 from typing import List
 
 from asonic.connection import ConnectionPool
-from asonic.enums import Commands, Channels, all_commands, enabled_commands, Actions
+from asonic.enums import (Actions, Channels, Commands, all_commands,
+                          enabled_commands)
 from asonic.exceptions import ClientError
 
 
@@ -37,7 +38,7 @@ class Client:
         self.pool = ConnectionPool(host=self.host, port=self.port, channel=channel,
                                    max_connections=self.max_connections)
 
-    async def query(self, collection: str, bucket: str, terms: str, limit: int = None, offset: int = None) \
+    async def query(self, collection: str, bucket: str, terms: str, limit: int = None, offset: int = None, locale: str = None) \
             -> List[bytes]:
         """
         query database
@@ -47,7 +48,8 @@ class Client:
         :param bucket: index bucket name (ie. user-specific search classifier in the collection if you have any
         :param terms: text for search terms
         :param limit: a positive integer number; set within allowed maximum & minimum limits
-        :param offset:  a positive integer number; set within allowed maximum & minimum limits
+        :param offset: a positive integer number; set within allowed maximum & minimum limits
+        :param locale: an ISO 639-3 locale code (if set, the code must be recognized)
         """
 
         response = await self._command(Commands.QUERY, collection, bucket, escape(terms), limit=limit, offset=offset)
@@ -95,7 +97,7 @@ class Client:
         """
         return await self._command(Commands.HELP, manual)
 
-    async def push(self, collection: str, bucket: str, obj: str, text: str) -> bytes:
+    async def push(self, collection: str, bucket: str, obj: str, text: str, locale: str = None) -> bytes:
         """
         Push search data in the index
         time complexity: O(1)
@@ -105,6 +107,7 @@ class Client:
         is stored (eg. you use Sonic to index CRM contacts by name; full CRM contact data is stored in a MySQL database
         in this case the object identifier in Sonic will be the MySQL primary key for the CRM contact)
         :param text: search text to be indexed (can be a single word, or a longer text; within maximum length safety
+        :param locale: an ISO 639-3 locale code (if set, the code must be recognized)
         limits)
         """
         return await self._command(Commands.PUSH, collection, bucket, obj, escape(text))
@@ -193,6 +196,8 @@ class Client:
                     values.append(f'LIMIT({kwargs[k]})')
                 elif k == 'offset':
                     values.append(f'OFFSET({kwargs[k]})')
+                elif k == 'locale':
+                    values.append(f'LANG({kwargs[k]})')
                 else:
                     values.append(kwargs[k])
         await c.write(f'{command} {" ".join(args)} {" ".join(values)}'.strip())
