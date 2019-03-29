@@ -38,7 +38,14 @@ class Client:
         self.pool = ConnectionPool(host=self.host, port=self.port, channel=channel,
                                    max_connections=self.max_connections)
 
-    async def query(self, collection: str, bucket: str, terms: str, limit: int = None, offset: int = None, locale: str = None) \
+    async def query(self,
+                    collection: str,
+                    bucket: str,
+                    terms: str,
+                    limit: int = None,
+                    offset: int = None,
+                    locale: str = None
+                    ) \
             -> List[bytes]:
         """
         query database
