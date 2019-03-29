@@ -1,6 +1,6 @@
 # asonic - async python client for the sonic search backend
 Asonic implements all [Sonic](https://github.com/valeriansaliou/sonic) APIs  
-This is a very early stage of the package, bugfixes and api changes are welcome
+Bugfixes and api changes are welcome
 
 ## Install
 `pip install asonic`
@@ -18,7 +18,7 @@ from asonic.enums import Channels
 
 
 async def main():
-  c = Client(host='127.0.0.1', port=1491)
+  c = Client(host='127.0.0.1', port=1491, password='SecretPassword', max_connections=100)
   await c.channel(Channels.SEARCH.value)  # or simply search
   await c.query('collection', 'bucket', 'quick') == 'user_id'
   await c.suggest('collection', 'bucket', 'br', 1)) == 'brown'
