@@ -14,7 +14,7 @@ except Exception:
 setup(
     name='asonic',
     author='Moshe Zada',
-    version='1.0.0',
+    version='1.0.1',
     packages=['asonic'],
     keywords=['asonic', 'sonic', 'search', 'asyncio', 'async', 'text'],
     url='https://github.com/moshe/asonic',
