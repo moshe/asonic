@@ -1,7 +1,7 @@
 version: '2.1'
 services:
   pytest:
-    command: flake8 --max-line-length 120 /app && py.test /app
+    command: sh -c 'flake8 --max-line-length 120 /app && py.test /app'
     environment:
       - SONIC_HOST=sonic
     build:
@@ -12,7 +12,7 @@ services:
       sonic:
         condition: service_healthy
   sonic:
-    image: valeriansaliou/sonic:v1.1.3
+    image: valeriansaliou/sonic:v1.1.9
     volumes:
       - ./tests/config.cfg:/etc/sonic.cfg
     healthcheck:

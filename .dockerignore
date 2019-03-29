@@ -5,3 +5,5 @@ __pycache__
 *.pyc
 .travis.yml
 docker-compose.yml
+data
+bench.py
