@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from asonic.connection import ConnectionPool
 from asonic.enums import (Actions, Channels, Commands, all_commands,
@@ -21,7 +21,7 @@ class Client:
         self.max_connections = max_connections
 
         self._channel = Channels.UNINITIALIZED.value
-        self.pool: ConnectionPool = None
+        self.pool: Union[ConnectionPool, None] = None
 
     async def channel(self, channel: str) -> None:
         if self._channel != Channels.UNINITIALIZED.value:
@@ -60,7 +60,8 @@ class Client:
         (if set, the locale must be a valid ISO 639-3 code; if not set, the locale will be guessed from text)
         """
 
-        response = await self._command(Commands.QUERY, collection, bucket, escape(terms), limit=limit, offset=offset)
+        response = await self._command(Commands.QUERY, collection, bucket, escape(terms),
+                                       limit=limit, offset=offset, locale=locale)
         tokens = response.split()
         if len(tokens) == 3:
             return []
@@ -119,7 +120,7 @@ class Client:
         :param locale: an ISO 639-3 locale code eg. `eng` for English
         (if set, the locale must be a valid ISO 639-3 code; if not set, the locale will be guessed from text)
         """
-        return await self._command(Commands.PUSH, collection, bucket, obj, escape(text))
+        return await self._command(Commands.PUSH, collection, bucket, obj, escape(text), locale=locale)
 
     async def pop(self, collection: str, bucket: str, obj: str, text: str) -> int:
         """

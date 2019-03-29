@@ -37,7 +37,7 @@ class Connection:
 
 
 class ConnectionPool:
-    def __init__(self, host: str, port: int, channel: int, max_connections: int = 100):
+    def __init__(self, host: str, port: int, channel: str, max_connections: int = 100):
         self.closed = False
         self._created_connections = 0
         self._available_connections = asyncio.Queue()
