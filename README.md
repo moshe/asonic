@@ -21,7 +21,7 @@ async def main():
   c = Client(host='127.0.0.1', port=1491, password='SecretPassword', max_connections=100)
   await c.channel(Channels.SEARCH.value)  # or simply search
   await c.query('collection', 'bucket', 'quick') == 'user_id'
-  await c.suggest('collection', 'bucket', 'br', 1)) == 'brown'
+  await c.suggest('collection', 'bucket', 'br', 1) == 'brown'
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
