@@ -13,7 +13,7 @@ def escape(t):
 
 
 class Client:
-    def __init__(self, host: str = 'localhost', port: int = 1491, password: str = 'SecretPassword',
+    def __init__(self, host: str = 'localhost', port: int = 1491, password: str = '',
                  max_connections: int = 100):
         self.host = host
         self.port = port
@@ -36,7 +36,8 @@ class Client:
                 setattr(self, command.lower(), mock)
         self._channel = channel
         self.pool = ConnectionPool(host=self.host, port=self.port, channel=channel,
-                                   max_connections=self.max_connections)
+                                   max_connections=self.max_connections,
+                                   password=self.password)
 
     async def query(self,
                     collection: str,
