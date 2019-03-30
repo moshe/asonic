@@ -45,8 +45,7 @@ class Client:
                     limit: int = None,
                     offset: int = None,
                     locale: str = None
-                    ) \
-            -> List[bytes]:
+                    ) -> List[bytes]:
         """
         query database
         time complexity: O(1) if enough exact word matches or O(N) if not enough exact matches where
@@ -190,7 +189,7 @@ class Client:
         Actions(action)
         return await self._command(Commands.TRIGGER, action=action)
 
-    async def _command(self, command, *args, **kwargs) -> bytes:
+    async def _command(self, command: Commands, *args, **kwargs) -> bytes:
         if isinstance(command, Commands):
             command = command.value
 
