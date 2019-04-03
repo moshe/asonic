@@ -13,7 +13,7 @@ def escape(t):
 
 
 class Client:
-    def __init__(self, host: str = 'localhost', port: int = 1491, password: str = '',
+    def __init__(self, host: str = 'localhost', port: int = 1491, password: str = 'SecretPassword',
                  max_connections: int = 100):
         self.host = host
         self.port = port
