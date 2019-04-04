@@ -5,7 +5,7 @@ from asonic.exceptions import ServerError, ConnectionClosed
 
 
 class Connection:
-    def __init__(self, host, port, channel, password='SecretPassword'):
+    def __init__(self, host, port, channel, password):
         self.host = host
         self.port = port
         self.channel = channel
@@ -37,7 +37,7 @@ class Connection:
 
 
 class ConnectionPool:
-    def __init__(self, host: str, port: int, channel: str, max_connections: int = 100):
+    def __init__(self, host: str, port: int, channel: str, password: str, max_connections: int = 100):
         self.closed = False
         self._created_connections = 0
         self._available_connections = asyncio.Queue()
@@ -45,6 +45,7 @@ class ConnectionPool:
         self.max_connections = max_connections
         self.host = host
         self.port = port
+        self.password = password
         self.channel = channel
 
     async def get_connection(self) -> Connection:
@@ -61,7 +62,7 @@ class ConnectionPool:
         if self._created_connections >= self.max_connections:
             return await self._available_connections.get()
         self._created_connections += 1
-        c = Connection(self.host, self.port, self.channel)
+        c = Connection(self.host, self.port, self.channel, self.password)
         await c.connect()
         return c
 

@@ -36,7 +36,8 @@ class Client:
                 setattr(self, command.lower(), mock)
         self._channel = channel
         self.pool = ConnectionPool(host=self.host, port=self.port, channel=channel,
-                                   max_connections=self.max_connections)
+                                   max_connections=self.max_connections,
+                                   password=self.password)
 
     async def query(self,
                     collection: str,
