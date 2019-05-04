@@ -33,6 +33,11 @@ async def test_suggest(search, ingest, control):
     assert (await ingest.count(collection, bucket, uid)) == 5
 
 
+async def test_info(control):
+    print((await control.info()))
+    assert 'command_latency_best' in (await control.info())
+
+
 async def test_query(search, ingest):
     bucket = 'bucket:1'
     uid = 'uid'
@@ -45,7 +50,7 @@ async def test_flushb(search, ingest):
     uid = 'uid'
     assert (await ingest.push(collection, bucket, uid, 'The quick brown fox jumps over the lazy dog')) == b'OK'
     assert (await search.query(collection, bucket, 'quick')) == [uid.encode()]
-    assert (await ingest.flushb(collection, bucket)) == 10
+    assert (await ingest.flushb(collection, bucket)) == 1
     assert (await search.query(collection, bucket, 'quick')) == []
 
 

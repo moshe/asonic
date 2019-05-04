@@ -3,6 +3,8 @@ from enum import Enum
 
 class Actions(Enum):
     CONSOLIDATE = 'consolidate'
+    BACKUP = 'backup'
+    RESTORE = 'restore'
 
 
 class Commands(Enum):
@@ -18,6 +20,7 @@ class Commands(Enum):
     FLUSHO = 'FLUSHO'
     COUNT = 'COUNT'
     TRIGGER = 'TRIGGER'
+    INFO = 'INFO'
 
 
 class Channels(Enum):
