@@ -190,6 +190,14 @@ class Client:
         Actions(action)
         return await self._command(Commands.TRIGGER, action=action)
 
+    async def info(self) -> dict:
+        """
+        Get server information
+        time complexity: O(1)
+        """
+        res = await self._command(Commands.INFO)
+        return dict(map(lambda x: x.replace('(', ' ').replace(')', '').split(), res[7:].decode().split()))
+
     async def _command(self, command: Commands, *args, **kwargs) -> bytes:
         if isinstance(command, Commands):
             command = command.value
