@@ -14,12 +14,12 @@ Bugfixes and api changes are welcome
 import asyncio
 
 from asonic import Client
-from asonic.enums import Channels
+from asonic.enums import Channel
 
 
 async def main():
   c = Client(host='127.0.0.1', port=1491, password='SecretPassword', max_connections=100)
-  await c.channel(Channels.SEARCH.value)  # or simply search
+  await c.channel(Channel.SEARCH.value)  # or simply search
   await c.query('collection', 'bucket', 'quick') == 'user_id'
   await c.suggest('collection', 'bucket', 'br', 1) == 'brown'
 
@@ -34,12 +34,12 @@ if __name__ == '__main__':
 import asyncio
 
 from asonic import Client
-from asonic.enums import Channels
+from asonic.enums import Channel
 
 
 async def main():
   c = Client(host='127.0.0.1', port=1491)
-  await c.channel(Channels.INGEST.value)  # or simply ingest
+  await c.channel(Channel.INGEST.value)  # or simply ingest
   await c.push('collection', 'bucket', 'user_id', 'The quick brown fox jumps over the lazy dog')
   # Return b'OK'
   await c.pop('collection', 'bucket', 'user_id', 'The')
@@ -57,12 +57,12 @@ if __name__ == '__main__':
 import asyncio
 
 from asonic import Client
-from asonic.enums import Channels, Actions
+from asonic.enums import Channel, Actions
 
 
 async def main():
   c = Client(host='127.0.0.1', port=1491)
-  await c.channel(Channels.CONTROL.value)  # or simply control
+  await c.channel(Channel.CONTROL.value)  # or simply control
   await c.trigger(Actions.CONSOLIDATE) # or simply consolidate
   # Return b'OK'
   await ingest.pop('collection', 'bucket', 'user_id', 'The')

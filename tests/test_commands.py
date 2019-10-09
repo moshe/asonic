@@ -1,7 +1,7 @@
 import pytest
 
 from asonic import Client
-from asonic.enums import Actions, Channels
+from asonic.enums import Actions, Channel
 from asonic.exceptions import ClientError, ConnectionClosed
 
 collection = 'collection'
@@ -114,7 +114,7 @@ async def test_mixed_commands(search):
 
 async def test_channel_twice(search):
     try:
-        await search.channel(Channels.CONTROL.value)
+        await search.channel(Channel.CONTROL)
     except ClientError:
         pass
     else:
