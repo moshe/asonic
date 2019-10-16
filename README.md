@@ -19,9 +19,9 @@ from asonic.enums import Channel
 
 async def main():
   c = Client(host='127.0.0.1', port=1491, password='SecretPassword', max_connections=100)
-  await c.channel(Channel.SEARCH.value)  # or simply search
-  await c.query('collection', 'bucket', 'quick') == 'user_id'
-  await c.suggest('collection', 'bucket', 'br', 1) == 'brown'
+  await c.channel(Channel.SEARCH)
+  assert (await c.query('collection', 'bucket', 'quick')) == [b'user_id']
+  assert (await c.suggest('collection', 'bucket', 'br', 1)) == [b'brown']
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
@@ -39,7 +39,7 @@ from asonic.enums import Channel
 
 async def main():
   c = Client(host='127.0.0.1', port=1491)
-  await c.channel(Channel.INGEST.value)  # or simply ingest
+  await c.channel(Channel.INGEST)
   await c.push('collection', 'bucket', 'user_id', 'The quick brown fox jumps over the lazy dog')
   # Return b'OK'
   await c.pop('collection', 'bucket', 'user_id', 'The')
@@ -57,16 +57,14 @@ if __name__ == '__main__':
 import asyncio
 
 from asonic import Client
-from asonic.enums import Channel, Actions
+from asonic.enums import Channel, Action
 
 
 async def main():
   c = Client(host='127.0.0.1', port=1491)
-  await c.channel(Channel.CONTROL.value)  # or simply control
-  await c.trigger(Actions.CONSOLIDATE) # or simply consolidate
+  await c.channel(Channel.CONTROL)
+  await c.trigger(Action.CONSOLIDATE)
   # Return b'OK'
-  await ingest.pop('collection', 'bucket', 'user_id', 'The')
-  # Return 1
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
