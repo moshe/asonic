@@ -4,7 +4,7 @@ from itertools import chain
 from typing import Set
 
 
-class Actions(Enum):
+class Action(Enum):
     CONSOLIDATE = 'consolidate'
     BACKUP = 'backup'
     RESTORE = 'restore'

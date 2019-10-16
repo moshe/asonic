@@ -1,8 +1,7 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from asonic.connection import ConnectionPool
-from asonic.enums import (Actions, Channel, Command, all_commands,
-                          enabled_commands)
+from asonic.enums import Action, Channel, Command, all_commands, enabled_commands
 from asonic.exceptions import ClientError
 
 
@@ -13,15 +12,16 @@ def escape(t):
 
 
 class Client:
-    def __init__(self, host: str = 'localhost', port: int = 1491, password: str = 'SecretPassword',
-                 max_connections: int = 100):
+    def __init__(
+        self, host: str = 'localhost', port: int = 1491, password: str = 'SecretPassword', max_connections: int = 100
+    ):
         self.host = host
         self.port = port
         self.password = password
         self.max_connections = max_connections
 
         self._channel = Channel.UNINITIALIZED
-        self.pool = None  # type: ConnectionPool
+        self.pool = None  # type: Optional[ConnectionPool]
 
     async def channel(self, channel: Channel) -> None:
         if self._channel != Channel.UNINITIALIZED:
@@ -34,18 +34,17 @@ class Client:
             if command not in enabled_commands[channel]:
                 setattr(self, command.value.lower(), mock)
         self._channel = channel
-        self.pool = ConnectionPool(host=self.host, port=self.port, channel=channel,
-                                   max_connections=self.max_connections,
-                                   password=self.password)
+        self.pool = ConnectionPool(
+            host=self.host,
+            port=self.port,
+            channel=channel,
+            max_connections=self.max_connections,
+            password=self.password,
+        )
 
-    async def query(self,
-                    collection: str,
-                    bucket: str,
-                    terms: str,
-                    limit: int = None,
-                    offset: int = None,
-                    locale: str = None
-                    ) -> List[bytes]:
+    async def query(
+        self, collection: str, bucket: str, terms: str, limit: int = None, offset: int = None, locale: str = None
+    ) -> List[bytes]:
         """
         query database
         time complexity: O(1) if enough exact word matches or O(N) if not enough exact matches where
@@ -59,8 +58,9 @@ class Client:
         (if set, the locale must be a valid ISO 639-3 code; if not set, the locale will be guessed from text)
         """
 
-        response = await self._command(Command.QUERY, collection, bucket, escape(terms),
-                                       limit=limit, offset=offset, locale=locale)
+        response = await self._command(
+            Command.QUERY, collection, bucket, escape(terms), limit=limit, offset=offset, locale=locale
+        )
         tokens = response.split()
         if len(tokens) == 3:
             return []
@@ -180,14 +180,13 @@ class Client:
         result = await self._command(Command.COUNT, collection, bucket=bucket, object=obj)
         return int(result[7:])
 
-    async def trigger(self, action: str = None) -> bytes:
+    async def trigger(self, action: Action = None) -> bytes:
         """
         Trigger an action
         time complexity: O(1)
         :param action: action to be triggered (available actions: consolidate)
         """
-        Actions(action)
-        return await self._command(Command.TRIGGER, action=action)
+        return await self._command(Command.TRIGGER, action=action.value if action else None)
 
     async def info(self) -> Dict:
         """
@@ -201,6 +200,7 @@ class Client:
         if self._channel == Channel.UNINITIALIZED:
             raise ClientError('Call .channel before running any command')
 
+        assert self.pool is not None
         c = await self.pool.get_connection()
 
         values = []
