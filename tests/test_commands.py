@@ -1,7 +1,7 @@
 import pytest
 
 from asonic import Client
-from asonic.enums import Actions, Channels
+from asonic.enums import Action, Channel
 from asonic.exceptions import ClientError, ConnectionClosed
 
 collection = 'collection'
@@ -27,7 +27,7 @@ async def test_suggest(search, ingest, control):
     bucket = 'bucket:1'
     uid = 'uid'
     assert (await ingest.push(collection, bucket, uid, 'RESULT commands(QUERY, SUGGEST, PING, HELP, QUIT)')) == b'OK'
-    assert (await control.trigger(Actions.CONSOLIDATE.value)) == b'OK'
+    assert (await control.trigger(Action.CONSOLIDATE)) == b'OK'
     assert (await search.suggest(collection, bucket, 'comm')) == [b'commands']
     assert (await search.suggest(collection, bucket, 'Q')) == [b'query', b'quit']
     assert (await ingest.count(collection, bucket, uid)) == 5
@@ -114,7 +114,7 @@ async def test_mixed_commands(search):
 
 async def test_channel_twice(search):
     try:
-        await search.channel(Channels.CONTROL.value)
+        await search.channel(Channel.CONTROL)
     except ClientError:
         pass
     else:

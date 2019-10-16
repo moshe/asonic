@@ -1,13 +1,16 @@
 from enum import Enum
+from itertools import chain
+
+from typing import Set
 
 
-class Actions(Enum):
+class Action(Enum):
     CONSOLIDATE = 'consolidate'
     BACKUP = 'backup'
     RESTORE = 'restore'
 
 
-class Commands(Enum):
+class Command(Enum):
     QUERY = 'QUERY'
     SUGGEST = 'SUGGEST'
     PING = 'PING'
@@ -23,7 +26,7 @@ class Commands(Enum):
     INFO = 'INFO'
 
 
-class Channels(Enum):
+class Channel(Enum):
     UNINITIALIZED = 'uninitialized'
     INGEST = 'ingest'
     SEARCH = 'search'
@@ -31,33 +34,33 @@ class Channels(Enum):
 
 
 enabled_commands = {
-    Channels.UNINITIALIZED.value: {
-        Commands.QUIT.value,
+    Channel.UNINITIALIZED: {
+        Command.QUIT,
     },
-    Channels.SEARCH.value: {
-        Commands.QUERY.value,
-        Commands.SUGGEST.value,
-        Commands.PING.value,
-        Commands.HELP.value,
-        Commands.QUIT.value,
+    Channel.SEARCH: {
+        Command.QUERY,
+        Command.SUGGEST,
+        Command.PING,
+        Command.HELP,
+        Command.QUIT,
     },
-    Channels.INGEST.value: {
-        Commands.PUSH.value,
-        Commands.POP.value,
-        Commands.COUNT.value,
-        Commands.FLUSHB.value,
-        Commands.FLUSHC.value,
-        Commands.FLUSHO.value,
-        Commands.PING.value,
-        Commands.HELP.value,
-        Commands.QUIT.value,
+    Channel.INGEST: {
+        Command.PUSH,
+        Command.POP,
+        Command.COUNT,
+        Command.FLUSHB,
+        Command.FLUSHC,
+        Command.FLUSHO,
+        Command.PING,
+        Command.HELP,
+        Command.QUIT,
     },
-    Channels.CONTROL.value: {
-        Commands.TRIGGER.value,
-        Commands.PING.value,
-        Commands.HELP.value,
-        Commands.QUIT.value,
+    Channel.CONTROL: {
+        Command.TRIGGER,
+        Command.PING,
+        Command.HELP,
+        Command.QUIT,
     }
 }
 
-all_commands = set(sum([list(x) for x in enabled_commands.values()], list()))
+all_commands = set(chain(*enabled_commands.values()))  # type: Set[Command]
