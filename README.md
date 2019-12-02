@@ -14,12 +14,12 @@ Bugfixes and api changes are welcome
 import asyncio
 
 from asonic import Client
-from asonic.enums import Channel
+from asonic.enums import Channels
 
 
 async def main():
   c = Client(host='127.0.0.1', port=1491, password='SecretPassword', max_connections=100)
-  await c.channel(Channel.SEARCH)
+  await c.channel(Channels.SEARCH)
   assert (await c.query('collection', 'bucket', 'quick')) == [b'user_id']
   assert (await c.suggest('collection', 'bucket', 'br', 1)) == [b'brown']
 
