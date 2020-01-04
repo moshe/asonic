@@ -18,7 +18,7 @@ setup(
     packages=['asonic'],
     keywords=['asonic', 'sonic', 'search', 'asyncio', 'async', 'text'],
     url='https://github.com/moshe/asonic',
-    license='',
+    license='MPL-2.0',
     long_description=long_description,
     description='Async python client for Sonic database',
     install_requires=[],
