@@ -1,4 +1,5 @@
 import pytest
+from uuid import uuid4
 
 from asonic import Client
 from asonic.enums import Action, Channel
@@ -8,14 +9,13 @@ collection = 'collection'
 
 pytestmark = pytest.mark.asyncio
 
-
 async def test_ping(search, ingest):
     assert await search.ping() == b'PONG'
     assert await ingest.ping() == b'PONG'
 
 
 async def test_help(search):
-    assert await search.help('commands') == b'RESULT commands(QUERY, SUGGEST, PING, HELP, QUIT)'
+    assert await search.help('commands') == b'RESULT commands(QUERY, SUGGEST, LIST, PING, HELP, QUIT)'
 
 
 async def test_empty(search):
@@ -24,13 +24,13 @@ async def test_empty(search):
 
 
 async def test_suggest(search, ingest, control):
-    bucket = 'bucket:1'
-    uid = 'uid'
-    assert (await ingest.push(collection, bucket, uid, 'RESULT commands(QUERY, SUGGEST, PING, HELP, QUIT)')) == b'OK'
+    bucket = str(uuid4())
+    uid = str(uuid4())
+    assert (await ingest.push(collection, bucket, uid, 'RESULT commands(QUERY, SUGGEST, LIST, PING, HELP, QUIT)')) == b'OK'
     assert (await control.trigger(Action.CONSOLIDATE)) == b'OK'
     assert (await search.suggest(collection, bucket, 'comm')) == [b'commands']
     assert (await search.suggest(collection, bucket, 'Q')) == [b'query', b'quit']
-    assert (await ingest.count(collection, bucket, uid)) == 5
+    assert (await ingest.count(collection, bucket, uid)) == 8
 
 
 async def test_info(control):
@@ -39,15 +39,15 @@ async def test_info(control):
 
 
 async def test_query(search, ingest):
-    bucket = 'bucket:1'
-    uid = 'uid'
+    bucket = str(uuid4())
+    uid = str(uuid4())
     assert (await ingest.push(collection, bucket, uid, 'The quick brown fox jumps over the lazy dog')) == b'OK'
     assert (await search.query(collection, bucket, 'quick', 1, 0)) == [uid.encode()]
 
 
 async def test_flushb(search, ingest):
-    bucket = 'bucket:1'
-    uid = 'uid'
+    bucket = str(uuid4())
+    uid = str(uuid4())
     assert (await ingest.push(collection, bucket, uid, 'The quick brown fox jumps over the lazy dog')) == b'OK'
     assert (await search.query(collection, bucket, 'quick')) == [uid.encode()]
     assert (await ingest.flushb(collection, bucket)) == 1
@@ -55,8 +55,8 @@ async def test_flushb(search, ingest):
 
 
 async def test_flushc(search, ingest):
-    bucket = 'bucket:1'
-    uid = 'uid'
+    bucket = str(uuid4())
+    uid = str(uuid4())
     assert (await ingest.push(collection, bucket, uid, 'The quick brown fox jumps over the lazy dog')) == b'OK'
     assert (await search.query(collection, bucket, 'quick')) == [uid.encode()]
     assert (await ingest.flushc(collection)) == 1
@@ -64,8 +64,8 @@ async def test_flushc(search, ingest):
 
 
 async def test_flusho(search, ingest):
-    bucket = 'bucket:1'
-    uid = 'uid'
+    bucket = str(uuid4())
+    uid = str(uuid4())
     assert (await ingest.push(collection, bucket, uid, 'The quick brown fox jumps over the lazy dog')) == b'OK'
     assert (await search.query(collection, bucket, 'quick')) == [uid.encode()]
     assert (await ingest.flusho(collection, bucket, uid)) == 6
@@ -83,8 +83,8 @@ async def test_quit(search):
 
 
 async def test_pop(search, ingest):
-    bucket = 'bucket:1'
-    uid = 'uid'
+    bucket = str(uuid4())
+    uid = str(uuid4())
     assert (await ingest.push(collection, bucket, uid, 'The quick brown fox jumps over the lazy dog')) == b'OK'
     assert (await ingest.pop(collection, bucket, uid, 'quick')) == 1
     assert (await ingest.count(collection, bucket, uid)) == 5
@@ -92,9 +92,9 @@ async def test_pop(search, ingest):
 
 
 async def test_limit_offset(search, ingest):
-    bucket = 'bucket:1'
-    uid = 'uid'
-    uid2 = 'uid2'
+    bucket = str(uuid4())
+    uid = str(uuid4())
+    uid2 = str(uuid4())
     assert (await ingest.push(collection, bucket, uid, 'The quick brown fox jumps over the lazy dog')) == b'OK'
     assert (await ingest.push(collection, bucket, uid2,
                               'The quick brown fox jumps over the lazy dog complete')) == b'OK'

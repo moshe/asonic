@@ -12,7 +12,7 @@ services:
       sonic:
         condition: service_healthy
   sonic:
-    image: valeriansaliou/sonic:v1.2.0
+    image: valeriansaliou/sonic:v1.4.9
     volumes:
       - ./tests/config.cfg:/etc/sonic.cfg
     healthcheck:
