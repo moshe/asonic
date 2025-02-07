@@ -1,3 +1,4 @@
+from contextlib import nullcontext as does_not_raise
 import pytest
 from uuid import uuid4
 
@@ -8,6 +9,12 @@ from asonic.exceptions import ClientError, ConnectionClosed
 collection = 'collection'
 
 pytestmark = pytest.mark.asyncio
+
+async def test_client_init():
+    with does_not_raise():
+        _client = await Client.create(host="localhost", port=1491, password="SecretPassword")
+    with pytest.raises(ConnectionClosed):
+        _client = await Client.create(host="localhost", port=1491, password="invalid")
 
 async def test_ping(search, ingest):
     assert await search.ping() == b'PONG'

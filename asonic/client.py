@@ -13,7 +13,11 @@ def escape(t):
 
 class Client:
     def __init__(
-        self, host: str = 'localhost', port: int = 1491, password: str = 'SecretPassword', max_connections: int = 100
+        self,
+        host: str = 'localhost',
+        port: int = 1491,
+        password: str = 'SecretPassword',
+        max_connections: int = 100
     ):
         self.host = host
         self.port = port
@@ -22,6 +26,24 @@ class Client:
 
         self._channel = Channel.UNINITIALIZED
         self.pool = None  # type: Optional[ConnectionPool]
+
+    @classmethod
+    async def create(
+        self,
+        host: str = 'localhost',
+        port: int = 1491,
+        password: str = 'SecretPassword',
+        channel: Channel = Channel.SEARCH,
+        max_connections: int = 100
+    ):
+        client: Client = Client(
+            host=host,
+            port=port,
+            password=password,
+            max_connections=max_connections
+        )
+        _ = await client.channel(channel=channel)
+        return client
 
     async def channel(self, channel: Channel) -> None:
         if self._channel != Channel.UNINITIALIZED:
@@ -41,6 +63,8 @@ class Client:
             max_connections=self.max_connections,
             password=self.password,
         )
+        # force check if connection can be made
+        _ = await self.ping()
 
     async def query(
         self, collection: str, bucket: str, terms: str, limit: int = None, offset: int = None, locale: str = None

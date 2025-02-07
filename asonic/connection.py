@@ -23,7 +23,13 @@ class Connection:
         assert result.startswith(b'CONNECTED')
 
         await self.write(f'START {self.channel.value} {self.password}')
-        await self.read()
+        result = await self.read()
+        if result.startswith(b'STARTED'):
+            pass
+        elif result.startswith(b'ENDED'):
+            raise ConnectionClosed(f"Error {result}")
+        else:
+            raise ServerError(f"Unknown error {result}")
 
     async def write(self, msg: str) -> None:
         assert self.writer is not None, 'connect'
