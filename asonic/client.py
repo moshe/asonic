@@ -1,9 +1,13 @@
+import itertools
+import math
+import sys
 from typing import List, Dict, Optional
 
 from asonic.connection import ConnectionPool
 from asonic.enums import Action, Channel, Command, all_commands, enabled_commands
 from asonic.exceptions import ClientError
 
+BUFFER = 20000
 
 def escape(t):
     if t is None:
@@ -129,6 +133,15 @@ class Client:
         """
         return await self._command(Command.HELP, manual)
 
+    def _make_chunks(self, text: str, buffer: int):
+        text = text.strip()
+        length = len(text)
+        size = sys.getsizeof(text)
+        chunk_count = math.ceil(size/buffer)
+        chunk_len = math.ceil(length/chunk_count)
+        text_chunks = tuple("".join(chunk) for chunk in itertools.batched(text, chunk_len))
+        return text_chunks
+
     async def push(self, collection: str, bucket: str, obj: str, text: str, locale: str = None) -> bytes:
         """
         Push search data in the index
@@ -143,7 +156,9 @@ class Client:
         :param locale: an ISO 639-3 locale code eg. `eng` for English
         (if set, the locale must be a valid ISO 639-3 code; if not set, the locale will be guessed from text)
         """
-        return await self._command(Command.PUSH, collection, bucket, obj, escape(text), locale=locale)
+        for text_el in self._make_chunks(text, BUFFER):
+            result = await self._command(Command.PUSH, collection, bucket, obj, escape(text_el), locale=locale)
+        return result
 
     async def pop(self, collection: str, bucket: str, obj: str, text: str) -> int:
         """

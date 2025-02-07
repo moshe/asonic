@@ -1,8 +1,10 @@
 from contextlib import nullcontext as does_not_raise
 import pytest
+import sys
 from uuid import uuid4
 
 from asonic import Client
+from asonic.client import BUFFER
 from asonic.enums import Action, Channel
 from asonic.exceptions import ClientError, ConnectionClosed
 
@@ -105,6 +107,17 @@ async def test_pop(search, ingest):
     assert (await ingest.count(collection, bucket, uid)) == 5
     assert (await search.query(collection, bucket, 'quick')) == []
 
+
+async def test_ingest(search, ingest):
+    bucket = str(uuid4())
+    uid = str(uuid4())
+    assert (await ingest.push(collection, bucket, uid, 'żółć')) == b'OK'
+    assert (await search.query(collection, bucket, 'żółć', limit=1)) == [uid.encode()]
+    long_string = " ".join(str(uuid4()) for _ in range(10000))
+    chunks = ingest._make_chunks(long_string, BUFFER)
+    for chunk in chunks:
+        assert sys.getsizeof(chunk) <= BUFFER
+    assert (await ingest.push(collection, bucket, uid, long_string)) == b'OK'
 
 async def test_limit_offset(search, ingest):
     bucket = str(uuid4())
