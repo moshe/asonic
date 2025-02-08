@@ -225,7 +225,7 @@ class Client:
         Enumerates all words in an index
         time complexity: O(1)
         """
-        response = await self._command(Command.LIST, collection, bucket, limit=limit, offset=offset)
+        response = await self._command(command=Command.LIST, collection=collection, bucket=bucket, limit=limit, offset=offset)
         tokens = response.split()
         if len(tokens) == 3:
             return []

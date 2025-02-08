@@ -51,6 +51,14 @@ async def test_query(search, ingest):
     assert (await ingest.push(collection, bucket, uid, 'The quick brown fox jumps over the lazy dog')) == b'OK'
     assert (await search.query(collection, bucket, 'quick', 1, 0)) == [uid.encode()]
 
+async def test_list(search, ingest, control):
+    bucket = str(uuid4())
+    uid = str(uuid4())
+    await ingest.push(collection, bucket, uid, 'The quick brown fox jumps over the lazy dog')
+    await ingest.push(collection, bucket, uid, 'brown fox jumps')
+    await ingest.push(collection, bucket, uid, 'lazy dog jumps')
+    await control.trigger(action=Action.CONSOLIDATE)
+    assert set(await search.list(collection, bucket)) == {b'quick', b'brown', b'fox', b'jumps', b'lazy', b'dog'}
 
 async def test_flushb(search, ingest):
     bucket = str(uuid4())
