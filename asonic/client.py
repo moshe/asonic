@@ -1,5 +1,4 @@
-import itertools
-import math
+from collections import deque
 import sys
 from typing import List, Dict, Optional
 
@@ -133,14 +132,19 @@ class Client:
         """
         return await self._command(Command.HELP, manual)
 
-    def _make_chunks(self, text: str, buffer: int):
-        text = text.strip()
-        length = len(text)
-        size = sys.getsizeof(text)
-        chunk_count = math.ceil(size/buffer)
-        chunk_len = math.ceil(length/chunk_count)
-        text_chunks = tuple("".join(chunk) for chunk in itertools.batched(text, chunk_len))
-        return text_chunks
+    def _chunk_generator(self, text: str, buffer: int):
+        empty_string_size = sys.getsizeof(str())
+        chars = deque(text.strip())
+        chunk_size = empty_string_size
+        chunk = str()
+        while chars:
+            char = chars.popleft()
+            chunk += char
+            chunk_size += (sys.getsizeof(char) - empty_string_size)
+            if (not chars) or (chunk_size > (buffer-100)):
+                yield chunk
+                chunk_size = empty_string_size
+                chunk = str()
 
     async def push(self, collection: str, bucket: str, obj: str, text: str, locale: str = None) -> bytes:
         """
@@ -156,8 +160,8 @@ class Client:
         :param locale: an ISO 639-3 locale code eg. `eng` for English
         (if set, the locale must be a valid ISO 639-3 code; if not set, the locale will be guessed from text)
         """
-        for text_el in self._make_chunks(text, BUFFER):
-            result = await self._command(Command.PUSH, collection, bucket, obj, escape(text_el), locale=locale)
+        for text_chunk in self._chunk_generator(text, BUFFER):
+            result = await self._command(Command.PUSH, collection, bucket, obj, escape(text_chunk), locale=locale)
         return result
 
     async def pop(self, collection: str, bucket: str, obj: str, text: str) -> int:
