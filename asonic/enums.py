@@ -24,6 +24,7 @@ class Command(Enum):
     COUNT = 'COUNT'
     TRIGGER = 'TRIGGER'
     INFO = 'INFO'
+    LIST = 'LIST'
 
 
 class Channel(Enum):
@@ -40,6 +41,7 @@ enabled_commands = {
     Channel.SEARCH: {
         Command.QUERY,
         Command.SUGGEST,
+        Command.LIST,
         Command.PING,
         Command.HELP,
         Command.QUIT,

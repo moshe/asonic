@@ -220,6 +220,18 @@ class Client:
         res = await self._command(Command.INFO)
         return dict(map(lambda x: x.replace('(', ' ').replace(')', '').split(), res[7:].decode().split()))
 
+    async def list(self, collection: str, bucket: str = None, limit: int = None, offset: int = None) -> Dict:
+        """
+        Enumerates all words in an index
+        time complexity: O(1)
+        """
+        response = await self._command(command=Command.LIST, collection=collection, bucket=bucket, limit=limit, offset=offset)
+        tokens = response.split()
+        if len(tokens) == 3:
+            return []
+        else:
+            return tokens[3:]
+
     async def _command(self, command: Command, *args, **kwargs) -> bytes:
         if self._channel == Channel.UNINITIALIZED:
             raise ClientError('Call .channel before running any command')
@@ -241,7 +253,7 @@ class Client:
         await c.write(f'{command.value} {" ".join(args)} {" ".join(values)}'.strip())
 
         result = await c.read()
-        if command in {Command.QUERY, Command.SUGGEST}:
+        if command in {Command.QUERY, Command.SUGGEST, Command.LIST}:
             result = await c.read()
         await self.pool.release(c)
         if command == Command.QUIT:
