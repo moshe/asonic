@@ -1,9 +1,12 @@
+from collections import deque
+import sys
 from typing import List, Dict, Optional
 
 from asonic.connection import ConnectionPool
 from asonic.enums import Action, Channel, Command, all_commands, enabled_commands
 from asonic.exceptions import ClientError
 
+BUFFER = 20000
 
 def escape(t):
     if t is None:
@@ -129,6 +132,20 @@ class Client:
         """
         return await self._command(Command.HELP, manual)
 
+    def _chunk_generator(self, text: str, buffer: int):
+        empty_string_size = sys.getsizeof(str())
+        chars = deque(text.strip())
+        chunk_size = empty_string_size
+        chunk = str()
+        while chars:
+            char = chars.popleft()
+            chunk += char
+            chunk_size += (sys.getsizeof(char) - empty_string_size)
+            if (not chars) or (chunk_size > (buffer-100)):
+                yield chunk
+                chunk_size = empty_string_size
+                chunk = str()
+
     async def push(self, collection: str, bucket: str, obj: str, text: str, locale: str = None) -> bytes:
         """
         Push search data in the index
@@ -143,7 +160,9 @@ class Client:
         :param locale: an ISO 639-3 locale code eg. `eng` for English
         (if set, the locale must be a valid ISO 639-3 code; if not set, the locale will be guessed from text)
         """
-        return await self._command(Command.PUSH, collection, bucket, obj, escape(text), locale=locale)
+        for text_chunk in self._chunk_generator(text, BUFFER):
+            result = await self._command(Command.PUSH, collection, bucket, obj, escape(text_chunk), locale=locale)
+        return result
 
     async def pop(self, collection: str, bucket: str, obj: str, text: str) -> int:
         """
